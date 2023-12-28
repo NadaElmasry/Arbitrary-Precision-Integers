@@ -1,0 +1,44 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: g++.exe build active file",
+			"command": "C:/Users/Nada/mingw64/bin/g++.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"${workspaceFolder}\\*.cpp",
+				"-o",
+				"${fileDirname}\\bigint.exe",
+				"-Wall",
+				"-Wextra",
+				"-Wconversion",
+				"-Wsign-conversion",
+				"-Wshadow",
+				"-Wpedantic",
+				"-std=c++20",
+				"-D__USE_MINGW_ANSI_STDIO=1",
+				"-ggdb3"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: C:/Users/Nada/mingw64/bin/g++.exe",
+			"presentation": {
+                "clear": true,
+                "echo": true,
+                "focus": false,
+                "panel": "shared",
+                "reveal": "silent",
+                "showReuseMessage": true
+            }
+		}
+	]
+}
