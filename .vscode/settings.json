@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "limits": "cpp"
+        "limits": "cpp",
+        "iostream": "cpp"
     }
 }

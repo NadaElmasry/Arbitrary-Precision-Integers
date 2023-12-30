@@ -74,12 +74,6 @@ public:
     /**
      * @brief
      *
-     */
-
-    void copyElements(const BigInt &);
-    /**
-     * @brief
-     *
      * @return BigInt&
      */
 
@@ -216,7 +210,7 @@ BigInt operator-(BigInt, const BigInt &);
  *
  * @return BigInt
  */
-BigInt operator*(BigInt , const BigInt &);
+BigInt operator*(BigInt, const BigInt &);
 
 BigInt::BigInt()
 {
@@ -270,6 +264,31 @@ BigInt::BigInt(const string &number)
 
 BigInt::BigInt(const BigInt &number) : bigint(number.bigint), sign_negative(number.sign_negative) {}
 
+BigInt &BigInt::operator=(const BigInt &number)
+{
+    sign_negative = number.signNegative();
+    bigint = number.bigint;
+
+    return *this;
+}
+
+BigInt &BigInt::operator=(const int64_t number)
+{
+    BigInt temp(number);
+    sign_negative = temp.signNegative();
+    bigint = temp.bigint;
+
+    return *this;
+}
+
+BigInt &BigInt::operator=(const string &number)
+{
+    BigInt temp(number);
+    sign_negative = temp.signNegative();
+    bigint = temp.bigint;
+    return *this;
+}
+
 size_t BigInt::getSize() const
 {
 
@@ -287,25 +306,6 @@ uint8_t BigInt::getElement(const size_t i) const
     return bigint.at(i);
 }
 
-bool BigInt::compareAbsoluteValues(const BigInt &rhs)
-{
-    if (bigint.size() != rhs.getSize())
-    {
-        return (bigint.size() > rhs.getSize());
-    }
-    for (size_t i = bigint.size() - 1; i >= 0; i--)
-    {
-        if (bigint[i] != rhs.getElement(i))
-        {
-            return false;
-        }
-        if (i == 0)
-        {
-            break;
-        }
-    }
-    return true;
-}
 BigInt &BigInt::operator-()
 {
     if (!(bigint.size() == 1 && bigint[0] == 0))
@@ -370,25 +370,26 @@ bool operator>(const BigInt &lhs, const BigInt &rhs)
 
 bool operator<(const BigInt &lhs, const BigInt &rhs)
 {
-    if (lhs.signNegative() != rhs.signNegative())
-    {
-        return (lhs.signNegative());
-    }
-    if (lhs.getSize() != rhs.getSize())
-    {
-        return (lhs.getSize() < rhs.getSize());
-    }
-    for (size_t i = lhs.getSize() - 1; i >= 0; i--)
-    {
-        if (lhs.getElement(i) != rhs.getElement(i))
-        {
-            return (!lhs.signNegative() ^ (lhs.getElement(i) < rhs.getElement(i)));
-        }
-        if (i == 0)
-        {
-            break;
-        }
-    }
+    // if (lhs.signNegative() != rhs.signNegative())
+    // {
+    //     return (lhs.signNegative());
+    // }
+    // if (lhs.getSize() != rhs.getSize())
+    // {
+    //     return (lhs.getSize() < rhs.getSize());
+    // }
+    // for (size_t i = lhs.getSize() - 1; i >= 0; i--)
+    // {
+    //     if (lhs.getElement(i) != rhs.getElement(i))
+    //     {
+    //         return (!lhs.signNegative() ^ (lhs.getElement(i) < rhs.getElement(i)));
+    //     }
+    //     if (i == 0)
+    //     {
+    //         break;
+    //     }
+    // }
+    return (rhs > lhs);
 }
 
 bool operator>=(const BigInt &lhs, const BigInt &rhs)
@@ -441,51 +442,6 @@ BigInt &BigInt::operator-=(const BigInt &rhs)
 
     return *this;
 }
-BigInt operator+(BigInt lhs, const BigInt &rhs)
-{
-    lhs += rhs;
-    return lhs;
-}
-
-BigInt operator-(BigInt lhs, const BigInt &rhs)
-{
-    lhs -= rhs;
-    return lhs;
-}
-
-BigInt &BigInt::operator=(const BigInt &number)
-{
-    sign_negative = number.signNegative();
-    copyElements(number);
-
-    return *this;
-}
-
-BigInt &BigInt::operator=(const int64_t number)
-{
-    BigInt temp(number);
-    sign_negative = temp.signNegative();
-    copyElements(temp);
-
-    return *this;
-}
-
-BigInt &BigInt::operator=(const string &number)
-{
-    BigInt temp(number);
-    sign_negative = temp.signNegative();
-    copyElements(temp);
-    return *this;
-}
-
-void BigInt::copyElements(const BigInt &rhs)
-{
-    bigint.resize(rhs.getSize());
-    for (size_t i = 0; i < rhs.getSize(); i++)
-    {
-        bigint[i] = rhs.getElement(i);
-    }
-}
 
 BigInt &BigInt::operator*=(const BigInt &rhs)
 {
@@ -520,11 +476,24 @@ BigInt &BigInt::operator*=(const BigInt &rhs)
     return *this;
 }
 
+BigInt operator+(BigInt lhs, const BigInt &rhs)
+{
+    lhs += rhs;
+    return lhs;
+}
+
+BigInt operator-(BigInt lhs, const BigInt &rhs)
+{
+    lhs -= rhs;
+    return lhs;
+}
+
 BigInt operator*(BigInt lhs, const BigInt &rhs)
 {
     lhs *= rhs;
     return lhs;
 }
+
 BigInt BigInt::AbsoluteAddition(const BigInt &rhs)
 {
     size_t maxLen = max(bigint.size(), rhs.bigint.size());
@@ -583,6 +552,27 @@ BigInt BigInt::AbsoluteSubtraction(const BigInt &rhs)
 
     return *this;
 }
+
+bool BigInt::compareAbsoluteValues(const BigInt &rhs)
+{
+    if (bigint.size() != rhs.getSize())
+    {
+        return (bigint.size() > rhs.getSize());
+    }
+    for (size_t i = bigint.size() - 1; i >= 0; i--)
+    {
+        if (bigint[i] != rhs.getElement(i))
+        {
+            return false;
+        }
+        if (i == 0)
+        {
+            break;
+        }
+    }
+    return true;
+}
+
 ostream &operator<<(ostream &out, const BigInt &bigint)
 {
     if (bigint.signNegative() && (!(bigint.getSize() == 1 && bigint.getElement(0) == 0)))
