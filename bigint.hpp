@@ -2,6 +2,7 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 // Class Headers
@@ -18,23 +19,24 @@ public:
      *
      * @param number - 64-bit integer
      */
-    BigInt(const int64_t number);
+    BigInt(const int64_t number);  
     /**
-     * @brief Construct a new Big Int object
+     * @brief Construct a new Big Int object from a string
      *
-     * @param number
+     * @param number  - pointer to a string
      */
     BigInt(const string &number);
     /**
-     * @brief Construct a new Big Int object
+     * @brief Construct a new Big Int object from another BigInt object
      *
+     * @param bigint - another BigInt number 
      */
-    BigInt(const BigInt &);
+    BigInt(const BigInt &bigint);
     /**
-     * @brief
+     * @brief returns the sign of BigInt
      *
-     * @return true
-     * @return false
+     * @return true if the number is negative
+     * @return false if the number is positive
      */
     bool signNegative() const;
     /**
@@ -49,7 +51,7 @@ public:
      * @param i
      * @return uint8_t
      */
-    uint8_t getElement(const size_t i) const;
+    uint32_t getElement(const size_t) const;
     /**
      * @brief
      *
@@ -106,7 +108,7 @@ public:
      * @return BigInt&
      */
 
-    BigInt &operator=(const BigInt &bigint);
+    BigInt &operator=(const BigInt &);
     /**
      * @brief
      *
@@ -114,7 +116,7 @@ public:
      * @return BigInt&
      */
 
-    BigInt &operator=(const int64_t number);
+    BigInt &operator=(const int64_t);
     /**
      * @brief
      *
@@ -122,11 +124,11 @@ public:
      * @return BigInt&
      */
 
-    BigInt &operator=(const string &number);
+    BigInt &operator=(const string &);
 
-private:
-    vector<uint8_t> bigint;
-    bool sign_negative = false;
+    private:
+        vector<uint32_t> bigint;
+        bool sign_negative = false;
 };
 /**
  * @brief
@@ -212,34 +214,51 @@ BigInt operator-(BigInt, const BigInt &);
  */
 BigInt operator*(BigInt, const BigInt &);
 
+
+ostream &operator<<(ostream &out, const BigInt &bigint)
+{
+    if (bigint.signNegative() && (!(bigint.getSize() == 1 && bigint.getElement(0) == 0)))
+    {
+        out << '-';
+    }
+    for (size_t i = bigint.getSize() - 1; i > 0; i--)
+    {
+        out << bigint.getElement(i);
+    }
+    out << bigint.getElement(0);
+
+    return out;
+}
+
 BigInt::BigInt()
 {
     bigint.push_back(0);
 }
 
-BigInt::BigInt(const int64_t number)
+BigInt::BigInt(int64_t number)
 {
     sign_negative = number < 0;
     int64_t unsigned_number = abs(number);
-    if (number == 0)
+    if (unsigned_number == 0)
     {
-        BigInt();
+        bigint.push_back(0);
     }
     else
     {
         while (unsigned_number > 0)
         {
-            bigint.push_back(static_cast<uint8_t>(unsigned_number % 10));
+            bigint.push_back(static_cast<uint32_t>(unsigned_number % 10));
             unsigned_number /= 10;
         }
     }
+    
 }
 
 BigInt::BigInt(const string &number)
 {
     sign_negative = (number[0] == '-');
     bool sign_entered = (sign_negative || number[0] == '+');
-    int start = 0;
+    size_t start = 0;
     if (number.size() == 1 && sign_entered)
     {
         throw invalid_argument("Invalid integer. The sign of the number only was entered. No integer was entered");
@@ -248,13 +267,13 @@ BigInt::BigInt(const string &number)
     {
         start = 1;
     }
-    for (size_t i = number.size() - 1; i >= start; i++)
+    for (size_t i = number.size() - 1; i >= start; i--)
     {
         if (!((number[i] - '0' <= 9) && (number[i] - '0' >= 0)))
         {
             throw invalid_argument("Invalid Integer. A non-digit value was entered. Please enter only digits from 0-9");
         }
-        bigint.push_back(static_cast<uint8_t>(number[i]));
+        bigint.push_back(static_cast<uint32_t>(number[i] - '0'));
         if (i == 0)
         {
             break;
@@ -301,7 +320,7 @@ bool BigInt::signNegative() const
     return sign_negative;
 }
 
-uint8_t BigInt::getElement(const size_t i) const
+uint32_t BigInt::getElement(const size_t i) const
 {
     return bigint.at(i);
 }
@@ -370,25 +389,6 @@ bool operator>(const BigInt &lhs, const BigInt &rhs)
 
 bool operator<(const BigInt &lhs, const BigInt &rhs)
 {
-    // if (lhs.signNegative() != rhs.signNegative())
-    // {
-    //     return (lhs.signNegative());
-    // }
-    // if (lhs.getSize() != rhs.getSize())
-    // {
-    //     return (lhs.getSize() < rhs.getSize());
-    // }
-    // for (size_t i = lhs.getSize() - 1; i >= 0; i--)
-    // {
-    //     if (lhs.getElement(i) != rhs.getElement(i))
-    //     {
-    //         return (!lhs.signNegative() ^ (lhs.getElement(i) < rhs.getElement(i)));
-    //     }
-    //     if (i == 0)
-    //     {
-    //         break;
-    //     }
-    // }
     return (rhs > lhs);
 }
 
@@ -445,34 +445,35 @@ BigInt &BigInt::operator-=(const BigInt &rhs)
 
 BigInt &BigInt::operator*=(const BigInt &rhs)
 {
-    // Initialize result with zero
-    BigInt result;
+    // Initialize result with size bigger than the two bigints combined and initialize elements with zero
+    vector<uint32_t> result(bigint.size() + rhs.getSize()+1,0);
 
-    result.sign_negative = (!(sign_negative == rhs.sign_negative));
+    sign_negative = (!(sign_negative == rhs.sign_negative));
 
     // Perform multiplication digit by digit
     for (size_t i = 0; i < bigint.size(); i++)
     {
-        uint8_t carry = 0;
-        for (size_t j = 0; j < rhs.bigint.size() || carry; j++)
+        uint32_t carry = 0;
+        uint64_t current;
+        for (size_t j = 0; j < rhs.getSize() || carry; j++)
         {
-            if (j == result.bigint.size())
-                result.bigint.push_back(0);
+            if (j == result.size()){
+                result.push_back(0);
+                }
 
-            uint64_t current = result.bigint[i + j] +
-                               static_cast<uint64_t>(bigint[i]) * (j < rhs.bigint.size() ? rhs.bigint[j] : 0) + carry;
-            result.bigint[i + j] = static_cast<uint8_t>(current % 10);
-            carry = static_cast<uint8_t>(current / 10);
+            current = static_cast<uint64_t> (result[i + j] + (bigint[i]) * (j < rhs.getSize() ? rhs.getElement(j) : 0) + carry);
+            result[i + j] = static_cast<uint32_t>(current % 10);
+            carry = static_cast<uint32_t>(current / 10);
         }
     }
 
     // Remove leading zeros
-    while (result.bigint.size() > 1 && result.bigint.back() == 0)
+    while (result.size() > 1 && result.back() == 0)
     {
-        result.bigint.pop_back();
+        result.pop_back();
     }
 
-    *this = result;
+    bigint = result;
     return *this;
 }
 
@@ -528,20 +529,21 @@ BigInt BigInt::AbsoluteSubtraction(const BigInt &rhs)
     // Ensure enough space in the result vector
     bigint.resize(maxLen + 1, 0);
 
-    uint8_t carry = 0;
-    for (size_t i = 0; i < bigint.size(); ++i)
+    uint32_t carry = 0;
+    for (size_t i = 0; i < bigint.size(); i++)
     {
-        uint8_t difference = bigint[i];
+        int32_t difference = int32_t(bigint[i]);
         if (i < rhs.getSize())
-            difference -= rhs.getElement(i);
-
+        {
+            difference -= int32_t(rhs.getElement(i));
+        }
         if (difference < 0)
         {
             difference += 10;
             bigint[i + 1] -= 1;
         }
 
-        bigint[i] = difference;
+        bigint[i] = static_cast<uint32_t>(difference);
     }
 
     // Remove leading zeros
@@ -563,7 +565,7 @@ bool BigInt::compareAbsoluteValues(const BigInt &rhs)
     {
         if (bigint[i] != rhs.getElement(i))
         {
-            return false;
+            return (bigint[i] > rhs.getElement(i));
         }
         if (i == 0)
         {
@@ -573,17 +575,4 @@ bool BigInt::compareAbsoluteValues(const BigInt &rhs)
     return true;
 }
 
-ostream &operator<<(ostream &out, const BigInt &bigint)
-{
-    if (bigint.signNegative() && (!(bigint.getSize() == 1 && bigint.getElement(0) == 0)))
-    {
-        out << '-';
-    }
-    for (size_t i = bigint.getSize() - 1; i > 0; i--)
-    {
-        out << bigint.getElement(i);
-    }
-    out << bigint.getElement(0);
 
-    return out;
-}
