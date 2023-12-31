@@ -551,8 +551,7 @@ BigInt BigInt::AbsoluteSubtraction(const BigInt &rhs)
 {
     // if the user entered RHS BigInt > LHS BigInt then throw an error as the logic of the function assumes LHS > RHS
     if (!compareAbsoluteValues(rhs)){
-        throw logic_error("BigInt passed as argument (right hand side - RHS) is larger than the BigInt calling the function (left hand side - LHS). \\
-        Absolute Subtraction only works when LHS > RHS.");
+        throw logic_error("BigInt passed as argument (right hand side - RHS) is larger than the BigInt calling the function (left hand side - LHS). Absolute Subtraction only works when LHS > RHS.");
     }
 
     size_t maxLen = max(bigint.size(), rhs.getSize());

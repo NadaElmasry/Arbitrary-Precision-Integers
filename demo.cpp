@@ -1,9 +1,87 @@
 #include <iostream>
 #include <stdexcept>
+#include <fstream>
+#include <string>
+#include <sstream>
 #include "bigint.hpp"
 using namespace std;
 
 void file_demo() {
+     string filename = "demo.txt";
+     ifstream input(filename);
+     int line_number = 0;
+     string line;
+     BigInt bigint1;
+     // bigint1 = "555";
+     BigInt bigint2;
+//     bigint2= "444";
+     if (!input.is_open())
+     {
+          throw runtime_error("Cannot open file.");
+
+     }
+     while(getline(input,line)){
+          if(line_number == 0){
+               bigint1 = line.substr(0, line.size() - 1);
+               cout << "bigint1 = "<< bigint1 << endl;
+          }
+          else if(line_number==1){
+               bigint2 = line.substr(0, line.size() - 1);
+               cout << "bigint2 = "<< bigint2 << endl;
+          }
+          else{
+               if(line == "+"){
+
+                    cout << "bigint1 + bigint2 = " << (bigint1 + bigint2) << endl;
+               }
+               else if (line == "+=")
+               {
+                    cout << "bigint1 += bigint2 :  " << (bigint1 += bigint2) << endl;
+               }
+               else if (line == "-")
+               {
+                    cout << "bigint1 - bigint2 = " << (bigint1 - bigint2) << endl;
+               }
+               else if (line == "-=")
+               {
+                    cout << "bigint1 -= bigint2 : " << (bigint1 -= bigint2) << endl;
+               }
+               else if (line == "*")
+               {
+                    cout << "bigint1 * bigint2 = " << (bigint1 * bigint2) << endl;
+               }
+               else if (line == "*=")
+               {
+                    cout << "bigint1 *= bigint2 : " << (bigint1 *= bigint2) << endl;
+               }
+               else if (line == ">")
+               {
+                    cout << "bigint1 + bigint2 = " << (bigint1 + bigint2) << endl;
+               }
+               else if (line == "<")
+               {
+                    cout << "bigint1 > bigint2 : " << (bigint1 > bigint2) << endl;
+               }
+               else if (line == ">=")
+               {
+                    cout << "bigint1 >= bigint2 : " << (bigint1 >= bigint2) << endl;
+               }
+               else if (line == "<=")
+               {
+                    cout << "bigint1 < bigint2 : " << (bigint1 <= bigint2) << endl;
+               }
+               else if (line == "!=")
+               {
+                    cout << "bigint1 != bigint2 : " << (bigint1 != bigint2) << endl;
+               }
+               else if (line == "==")
+               {
+                    cout << "bigint1 == bigint2 : " << (bigint1 == bigint2) << endl;
+               }
+          }
+          line_number++;
+     }
+
 }
 void static_demo() {
 
@@ -69,6 +147,13 @@ void static_demo() {
 }
 
 int main() {
-     static_demo();
-     return 0;
-}
+     // static_demo();
+     try{
+          file_demo();
+     }
+     catch (const exception &e)
+     {
+          cout << "Exception: " << e.what() << endl;
+     }
+          return 0;
+     }
