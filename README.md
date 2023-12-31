@@ -105,3 +105,5 @@ bool operator>=(const BigInt &lhs, const BigInt &rhs);
 bool operator<=(const BigInt &lhs, const BigInt &rhs);
 ```
 
+### How to run demos
+in the main function in demo.cpp file run `file_demo()` to read input from file and perform operations. Run `static_demo()` to run the demo with the BigInts and operations defined inside it.
